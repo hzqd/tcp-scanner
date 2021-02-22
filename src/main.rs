@@ -16,12 +16,12 @@ fn main() {
         let pre_range = args[2].parse::<i32>().unwrap();
         let suf_range = args[3].parse::<i32>().unwrap();
 
-        let result = (pre_range..=suf_range).into_par_iter().map(|i|
-            match TcpStream::connect(format!("{}:{}", ip, i)) {
+        let result = (pre_range..=suf_range).into_par_iter().map(|i| format!("{}:{}", ip, i).then(|s|
+            match TcpStream::connect(s) {
                 Ok(_) => (Some(i), None),
                 Err(_) => (None, Some(i))
             }
-        ).collect::<Vec<(_, _)>>();
+        )).collect::<Vec<(_, _)>>();
 
         let open = result.par_iter().filter_map(|i| i.0).collect::<Vec<_>>();
         let close = result.into_par_iter().filter_map(|i| i.1).collect::<Vec<_>>();
